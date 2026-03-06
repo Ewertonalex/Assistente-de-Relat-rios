@@ -1,13 +1,23 @@
 /**
  * Netlify Function: geração de documento com Groq.
- * Keys vêm da variável de ambiente GROQ_API_KEYS (várias keys separadas por vírgula) no painel do Netlify.
+ * 5 keys embutidas para funcionar no Netlify sem configurar variáveis de ambiente.
  */
 const Groq = require('groq-sdk');
 
+const GROQ_API_KEYS_EMBED = [
+  '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',
+  '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',
+  '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',
+  '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',
+  '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'
+];
+
 function getKeys() {
   const env = process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '';
-  if (!env.trim()) return [];
-  return env.split(/[\n,]+/).map(k => k.trim()).filter(Boolean);
+  if (env.trim()) {
+    return env.split(/[\n,]+/).map(k => k.trim()).filter(Boolean);
+  }
+  return GROQ_API_KEYS_EMBED;
 }
 
 const TIPOS_DOCUMENTO = {
@@ -48,7 +58,7 @@ exports.handler = async (event) => {
 
   const GROQ_API_KEYS = getKeys();
   if (!GROQ_API_KEYS.length) {
-    return resposta(500, { erro: 'Nenhuma API Key do Groq configurada. Defina GROQ_API_KEYS no Netlify.' });
+    return resposta(500, { erro: 'Nenhuma API Key do Groq configurada.' });
   }
   if (!tipoDocumento || !nomeCompleto || !matricula || !destinatario || !ocorrido) {
     return resposta(400, { erro: 'Todos os campos são obrigatórios' });

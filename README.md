@@ -66,10 +66,11 @@ O instalador será criado em: **`release/Assistente de Relatórios CBTU Setup 1.
 
 ## Deploy no Netlify
 
+As 5 API keys já estão na função (`netlify/functions/gerar-documento.js`), então não é preciso configurar variáveis de ambiente.
+
 1. Conecte o repositório GitHub ao Netlify (Site settings → Build & deploy → Link repository).
 2. A configuração de build está em `netlify.toml` (Build command: `npm run build`, Publish directory: `dist`).
-3. **Variável de ambiente:** no Netlify, vá em Site settings → Environment variables e crie **GROQ_API_KEYS** com as 5 keys separadas por vírgula (ex.: `chave1,chave2,chave3,chave4,chave5`).
-4. Faça o deploy. O Netlify builda o frontend e publica a função; a URL `/api/gerar-documento` é redirecionada para ela.
+3. Faça o deploy. O Netlify builda o frontend e publica a função; a geração de documentos funciona com as keys embutidas.
 
 ## Como usar (desenvolvimento)
 
