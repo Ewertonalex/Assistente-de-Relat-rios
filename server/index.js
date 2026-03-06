@@ -7,11 +7,29 @@ import { fileURLToPath } from 'url';
 import Groq from 'groq-sdk';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
-const envPath = path.resolve(__dirname, '..', '.env');
+
+let envPath = path.resolve(__dirname, '..', '.env');
+if (!fs.existsSync(envPath) && typeof process !== 'undefined' && process.execPath) {
+  const alt = path.join(path.dirname(process.execPath), '.env');
+  if (fs.existsSync(alt)) envPath = alt;
+}
 dotenv.config({ path: envPath });
 
-// Múltiplas API keys (uma por linha ou separadas por vírgula no .env). Fallback: GROQ_API_KEY única.
-function carregarGroqKeys() {
+// Keys embutidas no instalador (JSON + fs para funcionar no .exe no Windows)
+function carregarKeysEmbutidas() {
+  const jsonPath = path.join(__dirname, 'groq-keys.embed.json');
+  try {
+    if (fs.existsSync(jsonPath)) {
+      const data = fs.readFileSync(jsonPath, 'utf8');
+      const keys = JSON.parse(data);
+      if (Array.isArray(keys) && keys.length > 0) return keys;
+    }
+  } catch (e) {}
+  return [];
+}
+
+// Múltiplas API keys do .env (uma por linha ou separadas por vírgula). Fallback: GROQ_API_KEY única.
+function carregarGroqKeysDoEnv() {
   const multi = process.env.GROQ_API_KEYS;
   if (multi && multi.trim()) {
     return multi.split(/[\n,]+/).map(k => k.trim()).filter(Boolean);
@@ -28,7 +46,13 @@ function carregarGroqKeys() {
   }
   return [];
 }
-const GROQ_API_KEYS = carregarGroqKeys();
+
+// Prioridade: keys embutidas (instalador) → depois .env
+const GROQ_API_KEYS = (() => {
+  const embutidas = carregarKeysEmbutidas();
+  if (embutidas.length > 0) return embutidas;
+  return carregarGroqKeysDoEnv();
+})();
 
 const app = express();
 const PORT = 3001;
@@ -126,7 +150,11 @@ Retorne APENAS o texto do documento formatado, sem título no início (o título
   }
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor rodando em http://localhost:${PORT}`);
-  console.log(`✓ ${GROQ_API_KEYS.length} API key(s) Groq configurada(s) (fallback automático em caso de falha/rate limit)`);
-});
+// Servir frontend (build) quando a pasta dist existir (uso no executável Windows)
+const distPath = path.join(__dirname, '..', 'dist');
+if (fs.existsSync(distPath)) {
+  app.use(express.static(distPath));
+  app.get('*', (req, res) => res.sendFile(path.join(distPath, 'index.html')));
+}
+
+export { app, PORT };

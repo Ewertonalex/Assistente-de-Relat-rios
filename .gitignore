@@ -1,5 +1,8 @@
 node_modules/
 dist/
+release/
+server/groq-keys.embed.cjs
+server/groq-keys.embed.json
 .env
 .env.local
 *.log

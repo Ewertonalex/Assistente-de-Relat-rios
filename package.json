@@ -1,16 +1,38 @@
 {
   "name": "assistente-relatorios-cbtu",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Assistente de IA para relatórios dos ASO Seguranças CBTU",
   "type": "module",
+  "main": "electron/main.js",
   "scripts": {
     "dev": "npm run kill-port 2>/dev/null; concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "kill-port": "lsof -ti:3001 | xargs kill -9 2>/dev/null || true",
     "dev:server": "dotenv -e .env -- node run-server.js",
     "dev:client": "vite",
     "build": "vite build",
+    "build:win": "node build-embed-keys.js && npm run build && electron-builder --win",
     "preview": "vite preview",
-    "start": "dotenv -e .env -- node run-server.js"
+    "start": "dotenv -e .env -- node run-server.js",
+    "electron": "electron ."
+  },
+  "build": {
+    "appId": "com.cbtu.assistente-relatorios",
+    "productName": "Assistente de Relatórios CBTU",
+    "publish": null,
+    "directories": { "output": "release" },
+    "files": ["dist", "server", "electron", "images", "package.json", "index.html", "node_modules"],
+    "win": {
+      "target": ["nsis"],
+      "icon": "images/CBTU_Logo.svg.png",
+      "signAndEditExecutable": false
+    },
+    "nsis": {
+      "oneClick": true,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    }
   },
   "dependencies": {
     "cors": "^2.8.5",
@@ -28,6 +50,8 @@
     "@vitejs/plugin-react": "^4.3.3",
     "concurrently": "^9.0.1",
     "dotenv-cli": "^11.0.0",
+    "electron": "^28.0.0",
+    "electron-builder": "^24.9.1",
     "vite": "^5.4.10"
   }
 }

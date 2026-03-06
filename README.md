@@ -37,7 +37,41 @@ GROQ_API_KEY=sua_chave_aqui
 
 4. Obtenha sua API Key em: https://console.groq.com/ → API Keys
 
-## Como usar
+## Uso no Windows (instalador)
+
+**O programa é para usar no Windows.** Você não precisa usar no Mac — no Mac (ou em qualquer PC com Node) você só **gera o instalador uma vez**. Depois envia o exe para o PC com Windows, instala lá e tudo funciona: as 5 API keys, geração de documento, PDF, Word, tudo igual.
+
+### 1. Gerar o instalador (uma vez, na máquina onde está o projeto)
+
+No `.env` da pasta do projeto, coloque as **5 API keys** em uma linha, separadas por vírgula:
+
+```
+GROQ_API_KEYS=chave1,chave2,chave3,chave4,chave5
+```
+
+Rode:
+
+```bash
+npm run build:win
+```
+
+O instalador será criado em: **`release/Assistente de Relatórios CBTU Setup 1.0.0.exe`**
+
+### 2. No Windows
+
+- Envie esse arquivo **.exe** para o PC com Windows (pendrive, e-mail, etc.).
+- Execute o instalador e instale.
+- Abra o atalho do **Assistente de Relatórios CBTU**.
+- **Não é preciso criar .env nem configurar nada no Windows** — as 5 keys já vêm dentro do instalador. O uso é o mesmo: gerar documento, editar, exportar PDF/Word.
+
+## Deploy no Netlify
+
+1. Conecte o repositório GitHub ao Netlify (Site settings → Build & deploy → Link repository).
+2. A configuração de build está em `netlify.toml` (Build command: `npm run build`, Publish directory: `dist`).
+3. **Variável de ambiente:** no Netlify, vá em Site settings → Environment variables e crie **GROQ_API_KEYS** com as 5 keys separadas por vírgula (ex.: `chave1,chave2,chave3,chave4,chave5`).
+4. Faça o deploy. O Netlify builda o frontend e publica a função; a URL `/api/gerar-documento` é redirecionada para ela.
+
+## Como usar (desenvolvimento)
 
 1. Inicie o projeto:
 

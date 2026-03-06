@@ -1,0 +1,17 @@
+# Build do frontend (Vite/React)
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# Redireciona /api/gerar-documento para a função serverless (keys embutidas)
+# Depois: SPA – todas as rotas para index.html
+[[redirects]]
+  from = "/api/gerar-documento"
+  to = "/.netlify/functions/gerar-documento"
+  status = 200
+  force = true
+
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
