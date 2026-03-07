@@ -8,6 +8,8 @@ export default function DocumentoFinal({
   setAssinatura,
   anexos,
   setAnexos,
+  onVoltar,
+  onFazerNovo,
   onSalvarPDF,
   onSalvarWord
 }) {
@@ -86,6 +88,16 @@ export default function DocumentoFinal({
       </div>
 
       <div className="acoes-exportar">
+        {onVoltar && (
+          <button type="button" className="btn btn-outline" onClick={onVoltar}>
+            Voltar à revisão
+          </button>
+        )}
+        {onFazerNovo && (
+          <button type="button" className="btn btn-outline acao-limpar" onClick={onFazerNovo}>
+            Fazer novo
+          </button>
+        )}
         <button className="btn btn-primario" onClick={onSalvarPDF}>
           Salvar PDF
         </button>

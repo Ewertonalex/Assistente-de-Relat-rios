@@ -9,5 +9,11 @@ export default defineConfig({
       '/api': 'http://localhost:3001',
       '/images': 'http://localhost:3001'
     }
+  },
+  test: {
+    environment: 'jsdom',
+    setupFiles: ['./src/test/setup.js'],
+    include: ['src/**/*.test.{js,jsx}', 'server/**/*.test.js'],
+    globals: true
   }
 })

@@ -24,6 +24,7 @@ function App() {
     ocorrido: ''
   })
   const [documentoGerado, setDocumentoGerado] = useState('')
+  const [tituloGerado, setTituloGerado] = useState('')
   const [tipoDocumentoNome, setTipoDocumentoNome] = useState('')
   const [assinatura, setAssinatura] = useState(null)
   const [anexos, setAnexos] = useState([])
@@ -49,6 +50,7 @@ function App() {
       const json = await res.json()
       if (!res.ok) throw new Error(json.erro || 'Erro ao gerar documento')
       setDocumentoGerado(json.documento)
+      setTituloGerado('')
       setTipoDocumentoNome(json.tipoDocumento)
       setEtapa('preview')
     } catch (err) {
@@ -69,9 +71,30 @@ function App() {
     setEtapa('final')
   }
 
+  const handleVoltarParaPreview = () => {
+    setEtapa('preview')
+  }
+
   const handleRefazer = () => {
     setEtapa('formulario')
     setDocumentoGerado('')
+    setTituloGerado('')
+  }
+
+  const handleFazerNovo = () => {
+    setEtapa('formulario')
+    setDocumentoGerado('')
+    setTituloGerado('')
+    setDados({
+      tipoDocumento: '',
+      nomeCompleto: '',
+      matricula: '',
+      destinatario: '',
+      ocorrido: ''
+    })
+    setAssinatura(null)
+    setAnexos([])
+    setErro('')
   }
 
   const handleEditar = (novoTexto) => {
@@ -90,6 +113,7 @@ function App() {
     const anexosBase64 = await Promise.all(anexos.map(fileToBase64))
     const dadosDoc = {
       tipoDocumento: tipoDocumentoNome,
+      titulo: tituloGerado,
       nomeCompleto: dados.nomeCompleto,
       matricula: dados.matricula,
       destinatario: dados.destinatario,
@@ -103,6 +127,7 @@ function App() {
     const anexosBase64 = await Promise.all(anexos.map(fileToBase64))
     const dadosDoc = {
       tipoDocumento: tipoDocumentoNome,
+      titulo: tituloGerado,
       nomeCompleto: dados.nomeCompleto,
       matricula: dados.matricula,
       destinatario: dados.destinatario,
@@ -179,6 +204,7 @@ function App() {
             onEditar={handleEditar}
             onAceitar={handleAceitarDocumento}
             onRefazer={handleRefazer}
+            onFazerNovo={handleFazerNovo}
           />
         )}
 
@@ -191,6 +217,8 @@ function App() {
             setAssinatura={setAssinatura}
             anexos={anexos}
             setAnexos={setAnexos}
+            onVoltar={handleVoltarParaPreview}
+            onFazerNovo={handleFazerNovo}
             onSalvarPDF={handleSalvarPDF}
             onSalvarWord={handleSalvarWord}
           />

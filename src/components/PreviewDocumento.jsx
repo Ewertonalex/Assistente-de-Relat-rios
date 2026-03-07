@@ -1,6 +1,6 @@
 import { useState } from 'react'
 
-export default function PreviewDocumento({ documento, tipoDocumento, dados, onEditar, onAceitar, onRefazer }) {
+export default function PreviewDocumento({ documento, tipoDocumento, dados, onEditar, onAceitar, onRefazer, onFazerNovo }) {
   const [editando, setEditando] = useState(false)
   const [textoEditado, setTextoEditado] = useState(documento)
 
@@ -50,8 +50,13 @@ export default function PreviewDocumento({ documento, tipoDocumento, dados, onEd
 
       <div className="acoes-preview">
         <button className="btn btn-outline" onClick={onRefazer}>
-          Refazer
+          Voltar ao formulário
         </button>
+        {onFazerNovo && (
+          <button type="button" className="btn btn-outline acao-limpar" onClick={onFazerNovo}>
+            Fazer novo
+          </button>
+        )}
         {!editando ? (
           <button className="btn btn-secundario" onClick={() => { setTextoEditado(documento); setEditando(true) }}>
             Editar

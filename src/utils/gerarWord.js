@@ -158,25 +158,11 @@ export async function gerarWord(dados, assinaturaBase64, anexos) {
   });
 
   sectionChildren.push(tabelaIdentificacao);
-  sectionChildren.push(new Paragraph({ text: '', spacing: { after: spacingEntreSecoes } }));
+  sectionChildren.push(new Paragraph({ text: '', spacing: { after: 200 } }));
 
-  // Título Descrição do documento
-  sectionChildren.push(
-    new Paragraph({
-      children: [
-        new TextRun({
-          text: 'Descrição do documento',
-          bold: true,
-          size: 20,
-          color: COR_AZUL_HEX
-        })
-      ],
-      spacing: { after: 180 }
-    })
-  );
-
-  // Parágrafos da descrição – justificados
-  const paragrafos = dados.documento.split(/\n\n+/).filter(p => p.trim());
+  // Corpo do documento: apenas o texto gerado pela IA (título já vem no texto)
+  const docTexto = (dados.documento || '').trim();
+  const paragrafos = docTexto.split(/\n\n+/).filter(p => p.trim());
   for (const p of paragrafos) {
     sectionChildren.push(
       new Paragraph({
@@ -257,6 +243,9 @@ export async function gerarWord(dados, assinaturaBase64, anexos) {
   });
 
   const doc = new Document({
+    creator: 'Assistente de Relatórios CBTU',
+    title: dados.tipoDocumento || 'Documento CBTU',
+    description: `Documento ${dados.tipoDocumento} - CBTU`,
     sections: [{
       properties: {},
       children: sectionChildren,

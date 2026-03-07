@@ -88,21 +88,15 @@ export async function gerarPDF(dados, assinaturaBase64, anexos) {
     didDrawPage: (data) => {}
   });
 
-  yPos = doc.lastAutoTable.finalY + 12;
+  yPos = doc.lastAutoTable.finalY + 10;
 
-  // Título da descrição
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.setTextColor(...COR_AZUL);
-  doc.text('Descrição do documento', margin, yPos);
-  yPos += 7;
-
-  // Corpo da descrição – justificado (parágrafos com splitTextToSize)
-  doc.setFont('helvetica', 'normal');
+  // Corpo do documento: apenas o texto gerado pela IA (título já vem no texto)
   doc.setFontSize(10.5);
+  doc.setFont('helvetica', 'normal');
   doc.setTextColor(40, 40, 40);
   const lineHeight = 5.5;
-  const paragrafos = dados.documento.split(/\n\n+/).filter(p => p.trim());
+  const docTexto = (dados.documento || '').trim();
+  const paragrafos = docTexto.split(/\n\n+/).filter(p => p.trim());
   for (const p of paragrafos) {
     const lines = doc.splitTextToSize(p.trim(), contentWidth);
     for (const line of lines) {

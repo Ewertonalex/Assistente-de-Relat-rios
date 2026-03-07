@@ -67,46 +67,76 @@ exports.handler = async (event) => {
   const tipoNome = TIPOS_DOCUMENTO[tipoDocumento] || tipoDocumento;
   const isPolicial = tipoDocumento === 'RDO' || tipoDocumento === 'BO';
 
-  const prompt = `Você é um assistente especializado em redigir documentos oficiais para ASO Segurança da CBTU - Companhia Brasileira de Trens Urbanos.
+  const prompt = `INSTRUÇÃO OBRIGATÓRIA DE FORMATO (faça primeiro):
+Sua resposta deve começar OBRIGATORIAMENTE com UMA LINHA contendo apenas o assunto/título do documento (ex.: "Solicitação de férias", "Requerimento de férias para junho de 2026"). Na linha seguinte deixe uma linha em branco. Só então escreva os parágrafos do documento. NUNCA comece o texto com "Por meio deste" ou "Eu," — a primeira linha é SEMPRE o assunto.
+
+---
+
+Você é um assistente especializado em redigir documentos oficiais para ASO Segurança da CBTU - Companhia Brasileira de Trens Urbanos.
 
 O ASO relatou o seguinte ocorrido com suas próprias palavras:
 "${ocorrido}"
 
 Sua tarefa é transformar esse relato em um documento formal do tipo: ${tipoNome}.
 
-Regras:
-- Use linguagem formal, objetiva e técnica apropriada para documentos oficiais
-- Mantenha TODAS as informações e fatos relatados pelo ASO
-- Estruture o texto em parágrafos claros
-- Use terceira pessoa ou primeira pessoa formal conforme o tipo de documento
-- Para RDO e BO: foco em descrição factual, data/hora se mencionadas, local, envolvidos
-- Para Requerimento e Solicitação: inclua justificativa e pedido formal
+REGRA OBRIGATÓRIA - PRIMEIRA PESSOA (NÃO IGNORE):
+- O texto do documento INTEIRO deve ser escrito como se o ASO estivesse falando de si: use "solicito", "justifico", "requeiro", "desloquei-me", "presenciei", "apresento", "peço", "informo".
+- É PROIBIDO escrever "O ASO", "o agente", "o solicitante", "ele/ela", "o ASO solicita", "o ASO justifica", "permitindo que ele possa". Substitua por: "Solicito", "Justifico", "Requeiro", "peço que eu tenha acesso".
+- Exemplo CERTO para Solicitação: "Por meio deste, solicito o extrato de pagamento referente a 2025. Justifico a presente solicitação para acompanhamento de meus pagamentos. Requeiro as providências para que eu tenha acesso às informações."
+- Exemplo ERRADO: "O ASO solicita... O ASO justifica... permitindo que ele possa."
+
+Demais regras:
+- Use linguagem formal, objetiva e técnica
+- Mantenha TODAS as informações relatadas pelo ASO
+- Para RDO e BO: narre em primeira pessoa (desloquei-me, presenciei, realizei)
+- Para Requerimento e Solicitação: use primeira pessoa (solicito, requeiro, justifico, peço)
 - Não invente informações que não estejam no relato
 - O documento deve estar pronto para ser impresso/assinado
 
-${isPolicial ? `Orientações específicas para RDO e BO (linha policial):
-- Adote estilo de redação de ocorrência policial: objetivo, impessoal, sem opiniões pessoais
+${isPolicial ? `Orientações específicas para RDO e BO:
+- Narre em primeira pessoa (ex.: "Desloquei-me ao local", "Presenciei", "Realizei a abordagem")
 - Narre os fatos em ORDEM CRONOLÓGICA (antes, durante e depois da ocorrência), deixando claro local, data e horário quando disponíveis
 - Destaque as ações do ASO e de terceiros, mencionando envolvidos, testemunhas e viaturas/equipes de segurança se constarem do relato
-- Use termos técnicos próprios de segurança/ocorrência (ex.: ocorrência, guarnição, deslocamento, abordagem, encaminhamento, vítima, autor, suspeito), somente quando fizerem sentido com o relato
-- Evite qualificações jurídicas (não tipifique crimes, não escreva "furto", "roubo" etc. se o ASO não usou esses termos; descreva apenas o que aconteceu)
-- Mantenha o texto com tom de registro oficial, como se fosse um histórico de ocorrência policial.` : ''}
+- Use termos técnicos próprios de segurança/ocorrência quando fizerem sentido com o relato
+- Evite qualificações jurídicas; descreva apenas o que aconteceu
+- Mantenha o texto com tom de registro oficial.` : ''}
 
-Retorne APENAS o texto do documento formatado, sem título no início (o título será adicionado separadamente).`;
+Lembrete final: a PRIMEIRA LINHA da sua resposta é OBRIGATORIAMENTE só o assunto (ex.: Solicitação de férias). Segunda linha em branco. Depois o corpo.`;
 
   const messages = [
-    { role: 'system', content: 'Você é um redator especializado em documentos oficiais para segurança operacional de transportes. Redija de forma clara, formal e profissional.' },
+    { role: 'system', content: 'Você redige documentos oficiais CBTU. REGRAS FIXAS: (1) Primeira pessoa: solicito, requeiro, justifico, desloquei-me, presenciei. NUNCA use "O ASO", "o agente", "ele/ela". (2) A PRIMEIRA LINHA da sua resposta é OBRIGATORIAMENTE apenas o assunto/título do documento (uma frase curta, ex.: Solicitação de férias). Você NUNCA pode começar a resposta com "Por meio deste" ou "Eu," — comece SEMPRE com o assunto na linha 1.' },
     { role: 'user', content: prompt }
   ];
   const options = { model: 'llama-3.3-70b-versatile', temperature: 0.3, max_tokens: 2000 };
+
+  function garantirTituloNoDocumento(raw) {
+    const t = (raw || '').trim();
+    if (!t) return t;
+    const primeiraLinha = t.split(/\n/)[0] || '';
+    const pareceTitulo = primeiraLinha.length <= 70 && !/^(por meio deste|eu,|o |a presente|solicito\s|requeiro\s|justifico\s|desloquei|informo\s)/i.test(primeiraLinha.trim());
+    if (pareceTitulo) return t;
+    const d = t.toLowerCase();
+    let titulo = '';
+    if (/requerimento.*f[eé]rias|f[eé]rias.*requerimento/.test(d)) titulo = 'Requerimento de férias';
+    else if (/solicitar.*f[eé]rias|f[eé]rias.*solicit|solicita[cç][aã]o.*f[eé]rias/.test(d)) titulo = 'Solicitação de férias';
+    else if (/folga|consulta\s+m[eé]dica/.test(d)) titulo = 'Solicitação de folga';
+    else if (/extrato.*pagamento|pagamento.*extrato/.test(d)) titulo = 'Solicitação de extrato de pagamento';
+    else {
+      const atePeriodo = t.match(/^[^.]{10,80}\.?/);
+      titulo = (atePeriodo ? atePeriodo[0].trim() : t.slice(0, 60).trim()) || 'Documento';
+    }
+    return titulo + '\n\n' + t;
+  }
 
   let lastError = null;
   for (let i = 0; i < GROQ_API_KEYS.length; i++) {
     try {
       const groq = new Groq({ apiKey: GROQ_API_KEYS[i] });
       const completion = await groq.chat.completions.create({ messages, ...options });
-      const documentoGerado = completion.choices[0]?.message?.content?.trim() || 'Não foi possível gerar o documento.';
-      return resposta(200, { sucesso: true, documento: documentoGerado, tipoDocumento: tipoNome });
+      const raw = completion.choices[0]?.message?.content?.trim() || '';
+      const MSG_ERRO = 'Não foi possível gerar o documento.';
+      const documento = raw ? garantirTituloNoDocumento(raw) : MSG_ERRO;
+      return resposta(200, { sucesso: true, documento, tipoDocumento: tipoNome });
     } catch (err) {
       lastError = err;
       const msg = (err && err.message) ? String(err.message) : '';
