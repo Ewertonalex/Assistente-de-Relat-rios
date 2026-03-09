@@ -66,11 +66,10 @@ O instalador será criado em: **`release/Assistente de Relatórios CBTU Setup 1.
 
 ## Deploy no Netlify
 
-As 5 API keys já estão na função (`netlify/functions/gerar-documento.js`), então não é preciso configurar variáveis de ambiente.
-
 1. Conecte o repositório GitHub ao Netlify (Site settings → Build & deploy → Link repository).
-2. A configuração de build está em `netlify.toml` (Build command: `npm run build`, Publish directory: `dist`).
-3. Faça o deploy. O Netlify builda o frontend e publica a função; a geração de documentos funciona com as keys embutidas.
+2. Em **Site settings → Environment variables**, adicione **`GROQ_API_KEYS`** com suas API keys do Groq separadas por vírgula (ex.: `chave1,chave2,chave3`).
+3. A configuração de build está em `netlify.toml` (Build command: `npm run build`, Publish directory: `dist`).
+4. Faça o deploy. O Netlify builda o frontend e publica a função; a geração de documentos usa as keys configuradas nas variáveis de ambiente.
 
 ## Como usar (desenvolvimento)
 
@@ -113,6 +112,13 @@ npm run dev
 - **PDF**: jsPDF, jspdf-autotable
 - **Word**: docx
 - **Assinatura**: react-signature-canvas
+
+## Onde atualizar as API Keys da Groq
+
+Se as chaves forem revogadas ou expiradas (erro 401 Invalid API Key):
+
+- **Uso local ou instalador Windows:** edite o arquivo **`.env`** na raiz do projeto. Use `GROQ_API_KEYS=chave1,chave2,chave3`. Depois, para o instalador, rode `node build-embed-keys.js` e em seguida `npm run build:win`.
+- **Deploy Netlify:** em **Site settings → Environment variables**, crie **`GROQ_API_KEYS`** com as chaves separadas por vírgula (ex.: `chave1,chave2,chave3`). Faça um novo deploy após salvar.
 
 ## Observações
 
