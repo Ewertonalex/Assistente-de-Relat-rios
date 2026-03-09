@@ -1,6 +1,6 @@
 {
   "name": "assistente-relatorios-cbtu",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Assistente de IA para relatórios dos ASO Seguranças CBTU",
   "type": "module",
   "main": "electron/main.js",
