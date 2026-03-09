@@ -1,12 +1,21 @@
 /**
  * Netlify Function: geração de documento com Groq.
- * Configure GROQ_API_KEYS no Netlify (Site settings → Environment variables), ex.: chave1,chave2,chave3
+ * Keys embutidas para funcionar sem configurar variáveis de ambiente no Netlify.
  */
 const Groq = require('groq-sdk');
 
+const GROQ_API_KEYS_EMBED = [
+  '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',
+  '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',
+  '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'
+];
+
 function getKeys() {
   const env = process.env.GROQ_API_KEYS || process.env.GROQ_API_KEY || '';
-  return env.split(/[\n,]+/).map(k => k.trim()).filter(Boolean);
+  if (env.trim()) {
+    return env.split(/[\n,]+/).map(k => k.trim()).filter(Boolean);
+  }
+  return GROQ_API_KEYS_EMBED;
 }
 
 const TIPOS_DOCUMENTO = {
