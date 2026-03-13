@@ -5,9 +5,9 @@
 const Groq = require('groq-sdk');
 
 const GROQ_API_KEYS_EMBED = [
-  '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',
-  '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',
-  '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'
+  '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',
+  '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',
+  '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'
 ];
 
 function getKeys() {
